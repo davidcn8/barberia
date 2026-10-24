@@ -1,0 +1,664 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Davo Barber</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=Instrument+Sans:wght@400;500;600;700&display=swap">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}[hidden]{display:none!important}</style>
+<style>
+/* Layout: una columna para móvil. Cabecera con franja de barbero, día en rejilla L-V, horas en 2 columnas, barra fija abajo con el botón. */
+:root{
+  --bg:#EDEFF2; --surface:#FFFFFF; --ink:#13171D; --muted:#5B6472; --line:#D3D8DF; --soft:#E3E7EE;
+  --red:#C42031; --on-red:#FFFFFF; --blue:#1B3B73; --on-blue:#FFFFFF; --ok:#1F7A4D;
+  --f-display:'Big Shoulders Display','Arial Narrow',Impact,sans-serif;
+  --f-body:'Instrument Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1116; --surface:#171C24; --ink:#EEF0F4; --muted:#9AA3B2; --line:#2A313C; --soft:#202733;
+    --red:#FF5062; --on-red:#1A0A0D; --blue:#8DB0F0; --on-blue:#0B1426; --ok:#5FD39A; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1116; --surface:#171C24; --ink:#EEF0F4; --muted:#9AA3B2; --line:#2A313C; --soft:#202733;
+  --red:#FF5062; --on-red:#1A0A0D; --blue:#8DB0F0; --on-blue:#0B1426; --ok:#5FD39A; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{
+  background:var(--bg); color:var(--ink); font-family:var(--f-body); font-size:16px; line-height:1.45; margin:0;
+  padding-block:0 150px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+}
+.wrap{max-width:480px;margin-inline:auto;min-width:0}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+
+.pole{height:12px;border-radius:0 0 6px 6px;background:repeating-linear-gradient(-45deg,var(--red) 0 10px,var(--surface) 10px 20px,var(--blue) 20px 30px,var(--surface) 30px 40px)}
+.top{padding:20px 0 6px}
+.kicker{margin:0;font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--red)}
+h1{margin:2px 0 6px;font-family:var(--f-display);font-weight:800;font-size:46px;line-height:1;letter-spacing:.01em;text-transform:uppercase;text-wrap:balance}
+.sub{margin:0;color:var(--muted);font-size:15px}
+.sub b{color:var(--ink);font-weight:600}
+
+h2{margin:26px 0 10px;font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+h2 span{color:var(--ink);letter-spacing:.02em;text-transform:none;font-size:15px;font-weight:600;margin-left:6px}
+
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:var(--soft);padding:4px;border-radius:12px;margin-top:16px}
+.tabs button{border:0;background:transparent;border-radius:9px;padding:10px;font-weight:600;color:var(--muted)}
+.tabs button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+
+.week{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.dow{text-align:center;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding-bottom:2px}
+.wk{margin:12px 0 6px;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.day{min-width:0;min-height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:6px 2px}
+.day b{font-family:var(--f-display);font-size:24px;line-height:1;font-weight:700}
+.day small{font-size:11px;color:var(--muted);white-space:nowrap}
+.day[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:var(--on-blue)}
+.day[aria-pressed="true"] small{color:var(--on-blue);opacity:.85}
+.day:disabled{opacity:.38;cursor:default}
+
+.slots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.slot{min-width:0;min-height:66px;text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:10px 14px;display:flex;flex-direction:column;justify-content:center}
+.slot b{font-family:var(--f-display);font-size:30px;line-height:1;font-weight:700;font-variant-numeric:tabular-nums}
+.slot small{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.slot[aria-pressed="true"]{background:var(--red);border-color:var(--red);color:var(--on-red)}
+.slot[aria-pressed="true"] small{color:var(--on-red);opacity:.9}
+.slot:disabled{cursor:default;background:var(--soft);border-style:dashed}
+.slot:disabled b{text-decoration:line-through;color:var(--muted)}
+.hint{margin:10px 0 0;font-size:14px;color:var(--muted)}
+
+label{display:block;margin:0 0 6px;font-size:14px;font-weight:600}
+.field{margin-bottom:14px}
+input,select{width:100%;height:50px;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:0 14px;font-size:16px}
+input::placeholder{color:var(--muted);opacity:.8}
+.note{margin:6px 0 0;font-size:13px;color:var(--muted)}
+
+.cta-bar{position:fixed;left:0;right:0;bottom:0;z-index:5;background:var(--surface);border-top:1px solid var(--line);
+  padding:12px max(16px,env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.cta-in{max-width:480px;margin-inline:auto}
+.sum{margin:0 0 8px;font-size:14px;color:var(--muted);min-height:20px;font-variant-numeric:tabular-nums}
+.sum b{color:var(--ink)}
+.cta,.btn{display:flex;align-items:center;justify-content:center;min-height:52px;border:0;border-radius:12px;background:var(--red);color:var(--on-red);font-weight:700;font-size:17px;text-decoration:none;padding:0 18px}
+.cta[aria-disabled="true"]{background:var(--soft);color:var(--muted);pointer-events:none}
+.sent{margin:10px 0 0;font-size:14px;color:var(--ok);font-weight:600}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px}
+.card + .card{margin-top:10px}
+.row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.row:first-child{border-top:0;padding-top:0}
+.row:last-child{padding-bottom:0}
+.who{min-width:0;flex:1 1 150px;overflow-wrap:anywhere}
+.who b{font-variant-numeric:tabular-nums;margin-right:6px}
+.who small{display:block;color:var(--muted)}
+.acts{display:flex;gap:6px;flex-wrap:wrap}
+.btn.sm{min-height:40px;font-size:14px;padding:0 14px;border-radius:10px}
+.ghost{min-height:40px;padding:0 14px;border-radius:10px;border:1px solid var(--line);background:transparent;font-weight:600;font-size:14px}
+.ghost.danger{color:var(--red);border-color:var(--red)}
+.ghost[disabled]{opacity:.5;cursor:default}
+.btn.block{width:100%}
+.dayh{margin:14px 0 6px;font-size:13px;font-weight:700;color:var(--blue);text-transform:capitalize}
+.empty{margin:0;color:var(--muted);font-size:15px}
+.banner{margin-top:14px;padding:12px 14px;border-radius:12px;background:var(--soft);font-size:14px}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(96px + env(safe-area-inset-bottom,0px));max-width:min(440px,calc(100% - 32px));z-index:9;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:14px;font-weight:600;text-align:center}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* ===== Añadidos: calendario mensual, horario, precio, revisión ===== */
+.price{color:var(--red)}
+.top .hours{margin-top:14px}
+.hours{list-style:none;margin:0;padding:12px 14px;display:grid;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:12px;font-size:14px;font-weight:400}
+.hours li{display:flex;flex-wrap:wrap;justify-content:space-between;gap:2px 12px}
+.hours span{color:var(--muted)}
+.hours b{font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
+
+.cal{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px}
+.cal-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.cal-title{margin:0;min-width:0;text-align:center;font-family:var(--f-display);font-weight:800;font-size:28px;line-height:1;letter-spacing:.02em;text-transform:uppercase}
+.nav{flex:none;width:44px;height:44px;border-radius:10px;border:1px solid var(--line);background:var(--bg);font-size:24px;line-height:1;display:flex;align-items:center;justify-content:center;padding:0 0 3px}
+.nav[disabled]{opacity:.3;cursor:default}
+.cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.cal-dow{text-align:center;font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--muted);padding:2px 0 4px}
+.cal-day{min-width:0;height:46px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:0}
+.cal-day b{font-family:var(--f-display);font-size:22px;line-height:1;font-weight:700;font-variant-numeric:tabular-nums}
+.cal-day:not(:disabled)::after{content:"";width:5px;height:5px;border-radius:50%;background:var(--ok)}
+.cal-day:disabled{cursor:default;background:var(--soft);border-color:transparent;color:var(--muted)}
+.cal-day:disabled b{opacity:.55}
+.cal-day.closed{background:transparent;border:1px dashed var(--line)}
+.cal-day.today{border:2px solid var(--blue)}
+.cal-day[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:var(--on-blue)}
+.cal-day[aria-pressed="true"]::after{background:var(--on-blue)}
+.legend{margin:10px 0 0;display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;font-size:12px;color:var(--muted)}
+.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--ok)}
+.dot.off{background:transparent;border:1px solid var(--muted)}
+
+.group{margin:14px 0 8px;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--blue)}
+.group:first-child{margin-top:0}
+
+.sumlist{margin:0;display:grid}
+.sumlist > div{display:flex;flex-wrap:wrap;justify-content:space-between;gap:2px 16px;padding:11px 0;border-top:1px solid var(--line)}
+.sumlist > div:first-child{border-top:0;padding-top:0}
+.sumlist > div:last-child{padding-bottom:0}
+.sumlist dt{color:var(--muted);font-size:14px}
+.sumlist dd{margin:0;font-weight:600;text-align:right;min-width:0;overflow-wrap:anywhere}
+.sumlist .total dd{font-family:var(--f-display);font-size:30px;line-height:1;color:var(--red)}
+.stack{display:grid;gap:10px;margin-top:14px}
+.ghost.block{width:100%}
+.cta{width:100%}
+button.cta{font-family:inherit}
+.cta[aria-disabled="true"]{cursor:default}
+a.ghost{display:inline-flex;align-items:center;text-decoration:none;color:var(--ink)}
+.sub .price{font-weight:700}
+@media (max-width:360px){
+  h1{font-size:40px}
+  .cal-title{font-size:24px}
+  .cal-day{height:42px}
+}
+
+.dayh{text-transform:none}
+.dayh::first-letter{text-transform:uppercase}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script>
+(function(){
+'use strict';
+/* ========= AJUSTES: lo único que tienes que tocar ========= */
+var CONFIG={
+  shop:'Davo Barber',
+  price:3,            /* precio del corte en euros */
+  horizonMonths:4,    /* mes actual + 4 meses más. Al empezar un mes nuevo se abre uno más. */
+  firebase:{          /* se rellena con los datos de tu proyecto de Firebase */
+    apiKey:'',
+    authDomain:'',
+    projectId:'',
+    appId:''
+  }
+};
+/* Horario por día de la semana (0 = domingo ... 6 = sábado). Cada bloque es [hora inicio, hora fin].
+   Lunes (1) y domingo (0) no tienen bloques, así que salen desactivados. */
+var SCHEDULE={
+  2:[[16,20]], 3:[[16,20]], 4:[[16,20]], 5:[[16,20]],
+  6:[[10,13],[16,19]]
+};
+/* ========================================================== */
+
+var KEYC='davo-barber-cliente-v1';
+var STEP=45;
+var app=document.getElementById('app');
+var DAYS=['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+var MONTHS=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+var MS=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+var DOWL=['L','M','X','J','V','S','D'];
+var PRICE=CONFIG.price+' €';
+
+function $(id){return document.getElementById(id)}
+function pad(n){return String(n).padStart(2,'0')}
+function hm(x){return pad(Math.floor(x/60))+':'+pad(x%60)}
+function key(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
+function parse(k){var p=k.split('-').map(Number);return new Date(p[0],p[1]-1,p[2])}
+function addDays(d,n){var x=new Date(d);x.setDate(x.getDate()+n);return x}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function digits(s){return String(s||'').replace(/\D/g,'')}
+function normPhone(s){var d=digits(s);if(d.length===9&&/^[679]/.test(d))d='34'+d;return d}
+function longDay(k){var d=parse(k);return DAYS[d.getDay()]+' '+d.getDate()+' de '+MONTHS[d.getMonth()]}
+function shortDay(k){var d=parse(k);return DAYS[d.getDay()].slice(0,3)+' '+d.getDate()+' '+MS[d.getMonth()]}
+function plural(n,a,b){return n+' '+(n===1?a:b)}
+function waLink(phone,msg){return 'https://wa.me/'+phone+'?text='+encodeURIComponent(msg)}
+function loadLocal(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}}
+function saveLocal(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+
+/* ================= capa de datos (Firebase) ================= */
+function makeDB(){
+  var cfg=CONFIG.firebase, fb=window.firebase;
+  if(!cfg.apiKey||!cfg.projectId)return {error:'config'};
+  if(!fb||!fb.initializeApp)return {error:'sdk'};
+  try{if(!fb.apps.length)fb.initializeApp(cfg)}catch(e){return {error:'sdk'}}
+  var fs=fb.firestore(), auth=fb.auth();
+  var slots=fs.collection('slots'), books=fs.collection('bookings');
+  function id(b){return b.date+'_'+b.time}
+  return {
+    watchSlots:function(from,ok,bad){
+      return slots.where('date','>=',from).onSnapshot(function(s){var o={};s.forEach(function(d){o[d.id]=d.data()});ok(o)},bad);
+    },
+    watchBookings:function(from,ok,bad){
+      return books.where('date','>=',from).onSnapshot(function(s){var a=[];s.forEach(function(d){var v=d.data();v.id=d.id;a.push(v)});ok(a)},bad);
+    },
+    book:function(b){
+      var i=id(b), bt=fs.batch();
+      bt.set(slots.doc(i),{date:b.date,time:b.time});
+      bt.set(books.doc(i),{date:b.date,time:b.time,name:b.name,phone:b.phone,reminded:false});
+      return bt.commit();
+    },
+    cancel:function(i){var bt=fs.batch();bt.delete(slots.doc(i));bt.delete(books.doc(i));return bt.commit()},
+    markReminded:function(i){return books.doc(i).update({reminded:true})},
+    block:function(list){var bt=fs.batch();list.forEach(function(b){bt.set(slots.doc(id(b)),{date:b.date,time:b.time,blocked:true})});return bt.commit()},
+    release:function(ids){var bt=fs.batch();ids.forEach(function(i){bt.delete(slots.doc(i))});return bt.commit()},
+    login:function(e,p){return auth.signInWithEmailAndPassword(e,p)},
+    logout:function(){return auth.signOut()},
+    onAuth:function(cb){return auth.onAuthStateChanged(cb)}
+  };
+}
+var DB=window.__DAVO_DB__||makeDB();
+
+/* ================= estado ================= */
+var cli=loadLocal(KEYC)||{};
+var S={slots:{},bookings:[]};
+var ui={sel:null,time:null,month:null,name:cli.name||'',phone:cli.phone||'',step:'pick',view:'book',
+        confirm:null,owner:false,user:null,ready:false,error:null,busy:false,done:null,selInit:false};
+function readHash(){ui.owner=location.hash==='#panel';ui.view=ui.owner?'admin':'book'}
+readHash();
+(function(){var n=new Date();ui.month={y:n.getFullYear(),m:n.getMonth()}})();
+
+/* ================= horario y huecos ================= */
+function blocksOf(d){return SCHEDULE[d.getDay()]||[]}
+function groupsOf(d){
+  return blocksOf(d).map(function(b){
+    var s=[];for(var m=b[0]*60;m+STEP<=b[1]*60;m+=STEP)s.push(m);
+    return {label:b[0]<14?'Mañana':'Tarde',slots:s};
+  });
+}
+function allSlots(d){var o=[];groupsOf(d).forEach(function(g){o=o.concat(g.slots)});return o}
+function taken(k,t){return !!S.slots[k+'_'+t]}
+function freeSlots(d){
+  var k=key(d), now=new Date(), tk=key(now), cut=now.getHours()*60+now.getMinutes()+30;
+  return allSlots(d).filter(function(t){return !taken(k,t)&&(k>tk||(k===tk&&t>=cut))});
+}
+function maxDate(){var n=new Date();return new Date(n.getFullYear(),n.getMonth()+CONFIG.horizonMonths+1,0)}
+function firstFreeDay(){
+  var d=new Date();d.setHours(0,0,0,0);var end=maxDate();
+  while(d<=end){if(freeSlots(d).length)return key(d);d=addDays(d,1)}
+  return null;
+}
+function openDays(n){
+  var o=[],d=new Date();d.setHours(0,0,0,0);
+  for(var i=0;i<n;i++){var x=addDays(d,i);if(blocksOf(x).length)o.push(key(x))}
+  return o;
+}
+function firstSel(){
+  if(ui.selInit)return;
+  ui.selInit=true;
+  ui.sel=firstFreeDay();
+  if(ui.sel){var b=parse(ui.sel);ui.month={y:b.getFullYear(),m:b.getMonth()}}
+}
+
+/* ================= mensajes e ics ================= */
+function firstName(b){return String(b.name||'').trim().split(/\s+/)[0]||''}
+function reminderMsg(b){
+  var f=firstName(b);
+  return 'Hola'+(f?' '+f:'')+', te recuerdo que mañana '+longDay(b.date)+' a las '+hm(b.time)+' tienes cita para cortarte el pelo en '+CONFIG.shop+' ('+PRICE+'). ¡Hasta mañana!';
+}
+function icsFile(k,t){
+  var d=k.replace(/-/g,''), s=pad(Math.floor(t/60))+pad(t%60)+'00', e=t+STEP, en=pad(Math.floor(e/60))+pad(e%60)+'00';
+  var stamp=new Date().toISOString().replace(/[-:]/g,'').split('.')[0]+'Z';
+  return ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Davo Barber//ES','BEGIN:VEVENT','UID:'+k+'-'+t+'@davobarber',
+    'DTSTAMP:'+stamp,'DTSTART:'+d+'T'+s,'DTEND:'+d+'T'+en,'SUMMARY:Corte de pelo en '+CONFIG.shop,
+    'DESCRIPTION:Precio: '+PRICE,'END:VEVENT','END:VCALENDAR'].join('\r\n');
+}
+function downloadIcs(k,t){
+  try{
+    var blob=new Blob([icsFile(k,t)],{type:'text/calendar'}), a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);a.download='cita-davo-barber.ics';
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+    setTimeout(function(){URL.revokeObjectURL(a.href)},2000);
+  }catch(e){toast('No se pudo crear el archivo del calendario.')}
+}
+
+/* ================= vista cliente ================= */
+function bannerHtml(){
+  var msg='';
+  if(DB.error==='config')msg='Reservas desactivadas: falta conectar la base de datos.';
+  else if(DB.error==='sdk')msg='No se pudo cargar el servicio de reservas. Revisa tu conexión y recarga la página.';
+  else if(ui.error)msg=ui.error;
+  return msg?'<div class="banner">'+esc(msg)+'</div>':'';
+}
+function calHtml(){
+  var now=new Date(), tk=key(now), y=ui.month.y, m=ui.month.m;
+  var idx=(y-now.getFullYear())*12+(m-now.getMonth());
+  var off=(new Date(y,m,1).getDay()+6)%7, dim=new Date(y,m+1,0).getDate();
+  var h='<div class="cal"><div class="cal-head">'+
+    '<button type="button" class="nav" data-nav="-1" aria-label="Mes anterior"'+(idx<=0?' disabled':'')+'>‹</button>'+
+    '<p class="cal-title" aria-live="polite">'+MONTHS[m]+' '+y+'</p>'+
+    '<button type="button" class="nav" data-nav="1" aria-label="Mes siguiente"'+(idx>=CONFIG.horizonMonths?' disabled':'')+'>›</button></div>'+
+    '<div class="cal-grid">'+DOWL.map(function(x){return '<span class="cal-dow" aria-hidden="true">'+x+'</span>'}).join('');
+  for(var i=0;i<off;i++)h+='<span></span>';
+  for(var d=1;d<=dim;d++){
+    var date=new Date(y,m,d), k=key(date), open=blocksOf(date).length>0, past=k<tk;
+    var ok=ui.ready&&open&&!past&&freeSlots(date).length>0;
+    var why=!open?', cerrado':past?', pasado':ok?'':ui.ready?', completo':', cargando';
+    h+='<button type="button" class="cal-day'+(k===tk?' today':'')+(open?'':' closed')+'" data-day="'+k+'" aria-pressed="'+(ui.sel===k)+'" aria-label="'+esc(longDay(k)+why)+'"'+(ok?'':' disabled')+'><b>'+d+'</b></button>';
+  }
+  return h+'</div><p class="legend"><i class="dot"></i> Hay citas libres <span>·</span> <i class="dot off"></i> Cerrado o completo</p></div>';
+}
+function slotsHtml(){
+  var head='<h2>2 · Hora'+(ui.sel?'<span>'+esc(longDay(ui.sel))+'</span>':'')+'</h2>';
+  if(!ui.ready)return head+'<p class="hint">'+(ui.error||DB.error?'Ahora mismo no se pueden ver los huecos.':'Cargando huecos…')+'</p>';
+  if(!ui.sel)return head+'<p class="hint">No quedan días libres en los próximos meses.</p>';
+  var d=parse(ui.sel), free=freeSlots(d), groups=groupsOf(d);
+  return head+groups.map(function(g){
+    var gh=groups.length>1?'<p class="group">'+g.label+'</p>':'';
+    return gh+'<div class="slots">'+g.slots.map(function(t){
+      var isFree=free.indexOf(t)>=0, on=ui.time===t&&isFree;
+      if(!isFree)return '<button type="button" class="slot" disabled><b>'+hm(t)+'</b><small>'+(taken(ui.sel,t)?'Ocupado':'Ya pasó')+'</small></button>';
+      return '<button type="button" class="slot" data-time="'+t+'" aria-pressed="'+on+'"><b>'+hm(t)+'</b><small>hasta '+hm(t+STEP)+'</small></button>';
+    }).join('')+'</div>';
+  }).join('');
+}
+function hoursHtml(){
+  return '<ul class="hours"><li><span>Martes a viernes</span><b>16:00 – 20:00</b></li>'+
+  '<li><span>Sábados</span><b>10:00 – 13:00 · 16:00 – 19:00</b></li>'+
+  '<li><span>Lunes y domingo</span><b>Cerrado</b></li></ul>';
+}
+function bookHtml(){
+  return ''+
+  '<div class="pole"></div>'+
+  '<header class="top"><p class="kicker">Reserva de cita</p><h1>'+esc(CONFIG.shop)+'</h1>'+
+  '<p class="sub"><b>Corte de pelo · '+STEP+' min · <span class="price">'+PRICE+'</span></b></p>'+hoursHtml()+'</header>'+
+  '<div id="z-banner">'+bannerHtml()+'</div>'+
+  '<h2>1 · Día</h2><div id="z-cal">'+calHtml()+'</div>'+
+  '<div id="z-slots">'+slotsHtml()+'</div>'+
+  '<h2>3 · Tus datos</h2>'+
+  '<div class="field"><label for="f-name">Nombre</label><input id="f-name" type="text" autocomplete="given-name" maxlength="60" placeholder="Tu nombre" value="'+esc(ui.name)+'"></div>'+
+  '<div class="field"><label for="f-phone">Tu móvil</label><input id="f-phone" type="tel" inputmode="tel" autocomplete="tel" maxlength="20" placeholder="600 123 456" value="'+esc(ui.phone)+'"><p class="note">Solo lo uso para recordarte la cita por WhatsApp el día antes.</p></div>';
+}
+function pickBar(){
+  return '<div class="cta-bar"><div class="cta-in"><p class="sum" id="cta-sum"></p>'+
+  '<button type="button" id="cta-btn" class="cta" data-act="review" aria-disabled="true">Revisar cita</button></div></div>';
+}
+function ctaInfo(){
+  var nm=ui.name.trim(), ph=digits(ui.phone);
+  if(DB.error)return {ok:false,why:'Reservas no disponibles ahora mismo.'};
+  if(!ui.ready)return {ok:false,why:'Cargando huecos…'};
+  if(!ui.sel||ui.time==null)return {ok:false,why:'Elige día y hora.'};
+  var sum='<b>'+esc(shortDay(ui.sel))+'</b> · '+hm(ui.time)+'–'+hm(ui.time+STEP)+' · '+PRICE;
+  if(nm.length<2)return {ok:false,why:sum+' · falta tu nombre'};
+  if(ph.length<9||ph.length>15)return {ok:false,why:sum+' · revisa tu móvil'};
+  return {ok:true,why:sum};
+}
+function updateCta(){
+  var s=ctaInfo(), sum=$('cta-sum'), b=$('cta-btn');
+  if(!sum||!b)return;
+  sum.innerHTML=s.why;
+  b.setAttribute('aria-disabled',s.ok?'false':'true');
+}
+function reviewHtml(){
+  return ''+
+  '<div class="pole"></div>'+
+  '<header class="top"><p class="kicker">Último paso</p><h1>Revisa tu cita</h1></header>'+
+  '<div class="card"><dl class="sumlist">'+
+  '<div><dt>Día</dt><dd>'+esc(longDay(ui.sel))+'</dd></div>'+
+  '<div><dt>Hora</dt><dd>'+hm(ui.time)+' – '+hm(ui.time+STEP)+'</dd></div>'+
+  '<div><dt>Servicio</dt><dd>Corte de pelo · '+STEP+' min</dd></div>'+
+  '<div><dt>Nombre</dt><dd>'+esc(ui.name.trim())+'</dd></div>'+
+  '<div><dt>Móvil</dt><dd>'+esc(ui.phone.trim())+'</dd></div>'+
+  '<div class="total"><dt>Precio</dt><dd>'+PRICE+'</dd></div></dl></div>'+
+  '<p class="note">Al confirmar, el hueco queda reservado para ti y nadie más lo puede coger. Pagas el corte en la barbería.</p>'+
+  '<div class="stack"><button type="button" class="ghost block" data-act="back">Cambiar día, hora o datos</button></div>';
+}
+function reviewBar(){
+  return '<div class="cta-bar"><div class="cta-in"><p class="sum"><b>'+esc(shortDay(ui.sel))+'</b> · '+hm(ui.time)+' · '+PRICE+'</p>'+
+  '<button type="button" class="cta" data-act="book"'+(ui.busy?' aria-disabled="true"':'')+'>'+(ui.busy?'Reservando…':'Confirmar cita')+'</button></div></div>';
+}
+function doneHtml(){
+  var b=ui.done;
+  return ''+
+  '<div class="pole"></div>'+
+  '<header class="top"><p class="kicker">Cita reservada</p><h1>Te espero</h1>'+
+  '<p class="sub"><b>'+esc(longDay(b.date))+' a las '+hm(b.time)+'</b><br>'+esc(CONFIG.shop)+' · '+STEP+' min · '+PRICE+'</p></header>'+
+  '<div class="card"><p class="empty" style="color:var(--ink)">El día antes te escribo por WhatsApp al <b>'+esc(b.phone)+'</b> para recordártelo.</p></div>'+
+  '<div class="stack"><button type="button" class="btn" data-act="ics">Añadir a mi calendario</button>'+
+  '<button type="button" class="ghost block" data-act="again">Reservar otra cita</button></div>';
+}
+
+/* ================= panel del barbero ================= */
+function timeOptions(k,withAll){
+  var first=true;
+  var o=withAll?'<option value="all">Todo el día</option>':'';
+  return o+allSlots(parse(k)).map(function(t){
+    var tk=taken(k,t), sel=(!withAll&&!tk&&first)?(first=false,' selected'):'';
+    return '<option value="'+t+'"'+(tk?' disabled':'')+sel+'>'+hm(t)+'–'+hm(t+STEP)+(tk?' (ocupado)':'')+'</option>';
+  }).join('');
+}
+function byTime(a,b){return a.date<b.date?-1:a.date>b.date?1:a.time-b.time}
+function adminTop(){
+  var tk=key(new Date()), tm=key(addDays(new Date(),1));
+  var today=S.bookings.filter(function(b){return b.date===tk}).sort(byTime);
+  var tomorrow=S.bookings.filter(function(b){return b.date===tm}).sort(byTime);
+  var pend=tomorrow.filter(function(b){return !b.reminded}).length;
+  var todayRows=today.length?today.map(function(b){
+    return '<div class="row"><div class="who"><b>'+hm(b.time)+'</b>'+esc(b.name)+'<small>'+esc(b.phone||'Sin móvil')+'</small></div></div>';
+  }).join(''):'<p class="empty">Hoy no tienes citas.</p>';
+  var money=today.length?'<span>'+plural(today.length,'cita','citas')+' · '+(today.length*CONFIG.price)+' €</span>':'';
+  var rem=tomorrow.length?tomorrow.map(function(b){
+    var p=normPhone(b.phone);
+    var link=p?'<a class="btn sm" target="_blank" rel="noopener" href="'+esc(waLink(p,reminderMsg(b)))+'">Recordar</a>':'<span class="note">Sin móvil</span>';
+    return '<div class="row"><div class="who"><b>'+hm(b.time)+'</b>'+esc(b.name)+'<small>'+esc(b.phone||'')+'</small></div><div class="acts">'+link+
+      '<button type="button" class="ghost" data-act="done" data-id="'+esc(b.id)+'"'+(b.reminded?' disabled':'')+'>'+(b.reminded?'Enviado':'Marcar enviado')+'</button></div></div>';
+  }).join(''):'<p class="empty">Mañana ('+esc(longDay(tm))+') no tienes citas.</p>';
+  var remNote=tomorrow.length?(pend?'<p class="note"><b>'+plural(pend,'recordatorio pendiente','recordatorios pendientes')+'</b>. Toca Recordar y se abre WhatsApp con el mensaje escrito.</p>':'<p class="note">Todos los recordatorios de mañana están enviados.</p>'):'';
+  return '<h2>Hoy'+money+'</h2><div class="card">'+todayRows+'</div>'+
+    '<h2>Recordatorios de mañana</h2><div class="card">'+rem+'</div>'+remNote;
+}
+function adminForms(){
+  var days=openDays(90);
+  var dateOpts=days.map(function(k){return '<option value="'+k+'">'+esc(shortDay(k))+'</option>'}).join('');
+  return ''+
+  '<h2>Apuntar una cita</h2>'+
+  '<div class="card"><p class="note" style="margin:0 0 12px">Para clientes que te piden la cita en persona o por teléfono.</p>'+
+  '<div class="two"><div class="field"><label for="a-date">Día</label><select id="a-date">'+dateOpts+'</select></div>'+
+  '<div class="field"><label for="a-time">Hora</label><select id="a-time">'+(days.length?timeOptions(days[0],false):'')+'</select></div></div>'+
+  '<div class="field"><label for="a-name">Nombre</label><input id="a-name" type="text" maxlength="60" placeholder="Nombre del cliente"></div>'+
+  '<div class="field"><label for="a-phone">Móvil</label><input id="a-phone" type="tel" inputmode="tel" maxlength="20" placeholder="600 123 456"></div>'+
+  '<button type="button" class="btn block" data-act="add">Apuntar cita</button></div>'+
+  '<h2>Bloquear huecos</h2>'+
+  '<div class="card"><p class="note" style="margin:0 0 12px">Para vacaciones o días que no puedes. Los clientes ya no pueden reservar esos huecos.</p>'+
+  '<div class="two"><div class="field"><label for="b-date">Día</label><select id="b-date">'+dateOpts+'</select></div>'+
+  '<div class="field"><label for="b-time">Hora</label><select id="b-time">'+(days.length?timeOptions(days[0],true):'')+'</select></div></div>'+
+  '<button type="button" class="btn block" data-act="block">Bloquear</button></div>';
+}
+function adminLists(){
+  var tk=key(new Date());
+  var upcoming=S.bookings.filter(function(b){return b.date>=tk}).sort(byTime);
+  var list='';
+  if(!upcoming.length)list='<p class="empty">Todavía no hay citas reservadas.</p>';
+  else{
+    var last='';
+    upcoming.forEach(function(b){
+      if(b.date!==last){list+='<p class="dayh">'+esc(longDay(b.date))+'</p>';last=b.date}
+      var ask=ui.confirm===b.id;
+      list+='<div class="row"><div class="who"><b>'+hm(b.time)+'</b>'+esc(b.name)+'<small>'+esc(b.phone||'Sin móvil')+'</small></div>'+
+        '<div class="acts"><button type="button" class="ghost danger" data-act="'+(ask?'cancel-yes':'cancel')+'" data-id="'+esc(b.id)+'">'+(ask?'¿Seguro? Cancelar':'Cancelar')+'</button></div></div>';
+    });
+  }
+  var bl={};
+  Object.keys(S.slots).forEach(function(i){var s=S.slots[i];if(s.blocked&&s.date>=tk)(bl[s.date]=bl[s.date]||[]).push(s.time)});
+  var days=Object.keys(bl).sort();
+  var blocked=days.length?days.map(function(d){
+    var ts=bl[d].sort(function(a,b){return a-b});
+    return '<div class="row"><div class="who"><b>'+esc(shortDay(d))+'</b>'+ts.map(hm).join(' · ')+'</div>'+
+      '<div class="acts"><button type="button" class="ghost" data-act="release" data-id="'+d+'">Liberar</button></div></div>';
+  }).join(''):'<p class="empty">No hay huecos bloqueados.</p>';
+  return '<h2>Próximas citas</h2><div class="card">'+list+'</div>'+
+    '<h2>Huecos bloqueados</h2><div class="card">'+blocked+'</div>';
+}
+function adminHtml(){
+  return ''+
+  '<div class="pole"></div>'+
+  '<header class="top"><p class="kicker">Panel del barbero</p><h1>'+esc(CONFIG.shop)+'</h1></header>'+
+  '<div id="z-banner">'+bannerHtml()+'</div>'+
+  '<div id="z-a">'+adminTop()+'</div>'+
+  adminForms()+
+  '<div id="z-b">'+adminLists()+'</div>'+
+  '<div class="stack"><button type="button" class="ghost block" data-act="logout">Cerrar sesión</button></div>';
+}
+function loginHtml(){
+  return ''+
+  '<div class="pole"></div>'+
+  '<header class="top"><p class="kicker">Acceso privado</p><h1>'+esc(CONFIG.shop)+'</h1></header>'+
+  '<div id="z-banner">'+bannerHtml()+'</div>'+
+  '<form id="login-form" class="card" autocomplete="on">'+
+  '<div class="field"><label for="l-email">Correo</label><input id="l-email" type="email" autocomplete="username" required></div>'+
+  '<div class="field"><label for="l-pass">Contraseña</label><input id="l-pass" type="password" autocomplete="current-password" required></div>'+
+  '<button type="submit" class="btn block">Entrar</button></form>'+
+  '<p class="note">Solo el barbero tiene acceso a las citas.</p>';
+}
+
+/* ================= pintar ================= */
+function tabs(){
+  return '<div class="tabs" role="group" aria-label="Vista">'+
+  '<button type="button" data-view="book" aria-pressed="'+(ui.view!=='admin')+'">Ver reservas</button>'+
+  '<button type="button" data-view="admin" aria-pressed="'+(ui.view==='admin')+'">Panel</button></div>';
+}
+function isAdminView(){return ui.owner&&ui.view==='admin'}
+function render(){
+  var y=window.scrollY, admin=isAdminView(), body, bar='';
+  if(admin)body=ui.user?adminHtml():loginHtml();
+  else if(ui.step==='review'){body=reviewHtml();bar=reviewBar()}
+  else if(ui.step==='done'&&ui.done){body=doneHtml()}
+  else{body=bookHtml();bar=pickBar()}
+  app.innerHTML='<div class="wrap">'+(ui.owner&&ui.user?tabs():'')+body+'</div>'+bar+'<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>';
+  if(!admin&&ui.step==='pick')updateCta();
+  window.scrollTo(0,y);
+}
+function refreshData(){
+  var z;
+  if(isAdminView()){
+    if(!ui.user)return;
+    if((z=$('z-banner')))z.innerHTML=bannerHtml();
+    if((z=$('z-a')))z.innerHTML=adminTop();
+    if((z=$('z-b')))z.innerHTML=adminLists();
+  }else if(ui.step==='pick'){
+    if((z=$('z-banner')))z.innerHTML=bannerHtml();
+    if((z=$('z-cal')))z.innerHTML=calHtml();
+    if((z=$('z-slots')))z.innerHTML=slotsHtml();
+    updateCta();
+  }
+}
+var tt;
+function toast(msg){
+  var t=$('toast'); if(!t)return;
+  t.textContent=msg; t.hidden=false; clearTimeout(tt); tt=setTimeout(function(){t.hidden=true},4000);
+}
+function go(step){ui.step=step;render();window.scrollTo(0,0)}
+
+/* ================= conexión con la base de datos ================= */
+var unsubBookings=null;
+function startBookings(){
+  stopBookings();
+  unsubBookings=DB.watchBookings(key(new Date()),function(a){S.bookings=a;refreshData()},function(){ui.error='No se pudieron leer las citas. Revisa tu conexión.';refreshData()});
+}
+function stopBookings(){if(typeof unsubBookings==='function')unsubBookings();unsubBookings=null;S.bookings=[]}
+if(!DB.error){
+  DB.watchSlots(key(new Date()),function(o){
+    S.slots=o;ui.ready=true;ui.error=null;firstSel();
+    if(ui.time!=null&&ui.sel&&freeSlots(parse(ui.sel)).indexOf(ui.time)<0)ui.time=null;
+    refreshData();
+  },function(){ui.error='No se pudieron cargar los huecos. Revisa tu conexión.';refreshData()});
+  DB.onAuth(function(u){
+    ui.user=u||null;
+    if(u)startBookings();else stopBookings();
+    render();
+  });
+}else{ui.error=null}
+
+function run(promise,okMsg,errMsg){
+  toast('Guardando…');
+  return promise.then(function(){toast(okMsg);return true},function(){toast(errMsg||'No se pudo guardar. Inténtalo otra vez.');return false});
+}
+
+/* ================= eventos ================= */
+app.addEventListener('click',function(e){
+  var t=e.target.closest('[data-day],[data-time],[data-nav],[data-view],[data-act]');
+  if(!t)return;
+  if(t.dataset.day){
+    ui.sel=t.dataset.day;
+    if(ui.time!=null&&freeSlots(parse(ui.sel)).indexOf(ui.time)<0)ui.time=null;
+    render();return;
+  }
+  if(t.dataset.time){ui.time=Number(t.dataset.time);render();return}
+  if(t.dataset.nav){
+    var n=new Date(ui.month.y,ui.month.m+Number(t.dataset.nav),1);
+    ui.month={y:n.getFullYear(),m:n.getMonth()};render();return;
+  }
+  if(t.dataset.view){ui.view=t.dataset.view;ui.confirm=null;render();window.scrollTo(0,0);return}
+  var act=t.dataset.act, id=t.dataset.id;
+  if(act==='review'){
+    if(t.getAttribute('aria-disabled')==='true'){toast(ctaInfo().why.replace(/<[^>]+>/g,''));return}
+    saveLocal(KEYC,{name:ui.name.trim(),phone:ui.phone.trim()});
+    go('review');return;
+  }
+  if(act==='back'){go('pick');return}
+  if(act==='again'){ui.time=null;ui.done=null;go('pick');return}
+  if(act==='ics'){if(ui.done)downloadIcs(ui.done.date,ui.done.time);return}
+  if(act==='book'){
+    if(ui.busy)return;
+    var b={date:ui.sel,time:ui.time,name:ui.name.trim(),phone:ui.phone.trim()};
+    ui.busy=true;render();
+    DB.book(b).then(function(){
+      ui.busy=false;ui.done=b;ui.time=null;go('done');
+    },function(err){
+      ui.busy=false;
+      var denied=err&&(err.code==='permission-denied'||err.code==='already-exists'||err.code==='aborted');
+      ui.step='pick';render();window.scrollTo(0,0);
+      toast(denied?'Ese hueco acaba de ser reservado por otra persona. Elige otro.':'No se pudo reservar. Revisa tu conexión e inténtalo otra vez.');
+    });
+    return;
+  }
+  if(act==='logout'){DB.logout();return}
+  if(act==='add'){
+    var date=$('a-date').value, time=Number($('a-time').value);
+    var name=$('a-name').value.trim(), phone=$('a-phone').value.trim();
+    if(name.length<2){toast('Escribe el nombre del cliente.');return}
+    if(!date||isNaN(time)){toast('Elige día y hora.');return}
+    if(taken(date,time)){toast('Ese hueco ya está ocupado.');return}
+    run(DB.book({date:date,time:time,name:name,phone:phone}),'Cita apuntada.').then(function(ok){
+      if(ok){$('a-name').value='';$('a-phone').value='';$('a-time').innerHTML=timeOptions(date,false)}
+    });
+    return;
+  }
+  if(act==='block'){
+    var bd=$('b-date').value, bt=$('b-time').value, list=[];
+    if(bt==='all')allSlots(parse(bd)).forEach(function(x){if(!taken(bd,x))list.push({date:bd,time:x})});
+    else if(!taken(bd,Number(bt)))list.push({date:bd,time:Number(bt)});
+    if(!list.length){toast('Ya no queda nada libre que bloquear en ese día.');return}
+    run(DB.block(list),plural(list.length,'hueco bloqueado.','huecos bloqueados.'));
+    return;
+  }
+  if(act==='release'){
+    var ids=Object.keys(S.slots).filter(function(i){return S.slots[i].blocked&&S.slots[i].date===id});
+    run(DB.release(ids),'Huecos liberados.');return;
+  }
+  if(act==='cancel'){ui.confirm=id;refreshData();return}
+  if(act==='cancel-yes'){ui.confirm=null;run(DB.cancel(id),'Cita cancelada.');return}
+  if(act==='done'){run(DB.markReminded(id),'Marcado como enviado.');return}
+});
+app.addEventListener('input',function(e){
+  if(e.target.id==='f-name'){ui.name=e.target.value;updateCta()}
+  else if(e.target.id==='f-phone'){ui.phone=e.target.value;updateCta()}
+});
+app.addEventListener('change',function(e){
+  if(e.target.id==='a-date'&&$('a-time'))$('a-time').innerHTML=timeOptions(e.target.value,false);
+  if(e.target.id==='b-date'&&$('b-time'))$('b-time').innerHTML=timeOptions(e.target.value,true);
+});
+app.addEventListener('submit',function(e){
+  if(e.target.id!=='login-form')return;
+  e.preventDefault();
+  var em=$('l-email').value.trim(), pw=$('l-pass').value;
+  if(!em||!pw)return;
+  DB.login(em,pw).then(null,function(){toast('Correo o contraseña incorrectos.')});
+});
+window.addEventListener('hashchange',function(){readHash();render()});
+
+render();
+})();
+</script>
+</body>
+</html>
